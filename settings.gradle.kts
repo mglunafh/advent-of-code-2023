@@ -8,3 +8,4 @@ pluginManagement {
 
 rootProject.name = "advent-of-code-2023"
 include("java-advent")
+include("kotlin-advent")
