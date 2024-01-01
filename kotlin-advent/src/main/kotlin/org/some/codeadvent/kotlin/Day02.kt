@@ -14,10 +14,6 @@ private const val TOTAL_BLUE = 14
 
 fun main() {
     val filename = Path.of("data/day02-input.txt")
-
-    val exists = Files.exists(filename)
-    println(exists)
-
     val lines = Files.lines(filename).toList()
 
     val gameRecords = lines.map { parseGameRecordSplit(it) }
@@ -30,7 +26,6 @@ fun main() {
     val sumOfPowers = gameRecords
         .map { minimalPossibleBag(it) }
         .sumOf { it.red * it.green * it.blue }
-
     println(sumOfPowers)
 }
 
