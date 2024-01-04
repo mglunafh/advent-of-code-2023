@@ -2,7 +2,6 @@ package org.some.codeadvent.kotlin
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.stream.Collectors
 
 fun main() {
     val filename = Path.of("data/day07-input.txt")
@@ -31,7 +30,7 @@ data class Bet(val hand: String, val bid: Int) : Comparable<Bet> {
 
     init {
         require(hand.length == 5) {
-            "Wrong number of cards in the hard, should be five, got ${hand.length} instead"
+            "Wrong number of cards in the hand, should be five, got ${hand.length} instead"
         }
         require(bid > 0) {
             "Bid should be positive, got '$bid' instead"
@@ -56,11 +55,22 @@ data class Bet(val hand: String, val bid: Int) : Comparable<Bet> {
     }
 
     companion object {
+        fun strength(card: Char): Int {
+            return when {
+                card.isDigit() -> card.digitToInt()
+                card == 'T' -> 10
+                card == 'J' -> 11
+                card == 'Q' -> 12
+                card == 'K' -> 13
+                card == 'A' -> 14
+                else -> throw IllegalArgumentException("Symbol '$card' does not represent a card")
+            }
+        }
+
         private fun determineType(hand: String): HandType {
-            val amounts = hand.chars()
-                .mapToObj { it }
-                .collect(Collectors.groupingBy({ it.toChar() }, Collectors.counting()))
-                .map { it.value.toInt() }
+            val amounts = hand.toCharArray()
+                .groupBy { it }
+                .map { it.value.size }
 
             return when {
                 amounts.size == 5 -> HandType.HIGH_CARD
@@ -81,7 +91,7 @@ data class JokerBet(val hand: String, val bid: Int) : Comparable<JokerBet> {
 
     init {
         require(hand.length == 5) {
-            "Wrong number of cards in the hard, should be five, got ${hand.length} instead"
+            "Wrong number of cards in the hand, should be five, got ${hand.length} instead"
         }
         require(bid > 0) {
             "Bid should be positive, got '$bid' instead"
@@ -109,25 +119,37 @@ data class JokerBet(val hand: String, val bid: Int) : Comparable<JokerBet> {
 
         private const val JOKER = 'J'
 
-        private fun determineType(hand: String): HandType {
-            val cardsToAmounts = hand.chars()
-                .mapToObj { it }
-                .collect(Collectors.groupingBy({ it.toChar() }, Collectors.counting()))
+        fun jokerStrength(card: Char): Int {
+            return when {
+                card.isDigit() -> card.digitToInt()
+                card == 'J' -> -1
+                card == 'T' -> 10
+                card == 'Q' -> 12
+                card == 'K' -> 13
+                card == 'A' -> 14
+                else -> throw IllegalArgumentException("Symbol '$card' does not represent a card")
+            }
+        }
 
-            val jokers = cardsToAmounts.getOrDefault(JOKER, 0).toInt()
+        private fun determineType(hand: String): HandType {
+            val cardsToAmounts = hand.toCharArray()
+                .groupBy { it }
+                .mapValues { it.value.size }
+
+            val jokers = cardsToAmounts.getOrDefault(JOKER, 0)
             val mostNonJokers = cardsToAmounts.filter { it.key != JOKER }.maxByOrNull { it.value }
 
             val adjustedCardsToAmounts = when {
-                jokers == 0 -> cardsToAmounts.mapValues { it.value.toInt() }
+                jokers == 0 -> cardsToAmounts.mapValues { it.value }
                 mostNonJokers == null -> mapOf(JOKER to 5)
                 else -> mutableMapOf<Char, Int>().apply {
                     for ((key, value) in cardsToAmounts) {
                         if (key == JOKER) {
                             continue
                         } else if (key == mostNonJokers.key) {
-                            put(key, value.toInt() + jokers)
+                            put(key, value + jokers)
                         } else {
-                            put(key, value.toInt())
+                            put(key, value)
                         }
                     }
                 }.toMap()
@@ -149,28 +171,4 @@ data class JokerBet(val hand: String, val bid: Int) : Comparable<JokerBet> {
 
 enum class HandType {
     HIGH_CARD, PAIR, TWO_PAIRS, TRIPLE, FULL_HOUSE, FOUR, FIVE
-}
-
-fun strength(card: Char): Int {
-    return when {
-        card.isDigit() -> card.digitToInt()
-        card == 'T' -> 10
-        card == 'J' -> 11
-        card == 'Q' -> 12
-        card == 'K' -> 13
-        card == 'A' -> 14
-        else -> throw IllegalArgumentException("Symbol '$card' does not represent a card")
-    }
-}
-
-fun jokerStrength(card: Char): Int {
-    return when {
-        card.isDigit() -> card.digitToInt()
-        card == 'J' -> -1
-        card == 'T' -> 10
-        card == 'Q' -> 12
-        card == 'K' -> 13
-        card == 'A' -> 14
-        else -> throw IllegalArgumentException("Symbol '$card' does not represent a card")
-    }
 }
