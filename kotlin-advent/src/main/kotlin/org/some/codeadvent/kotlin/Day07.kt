@@ -5,7 +5,7 @@ import java.nio.file.Path
 import java.util.stream.Collectors
 
 fun main() {
-    val filename = Path.of("data/day07-test.txt")
+    val filename = Path.of("data/day07-input.txt")
     val lines = Files.lines(filename).toList()
 
     val draws = lines
@@ -21,10 +21,7 @@ fun main() {
         .map { JokerBet(it[0], it[1].toInt()) }
 
     val totalJokerWinnings = jokerDraws.sorted()
-        .foldIndexed(0L) { ind, acc, bet ->
-            val msg = String.format("%20s: %s","(${bet.type.toString().lowercase()}) ${bet.hand}", "$acc + ${ind + 1} * ${bet.bid}")
-            println(msg)
-            acc + (ind + 1) * bet.bid }
+        .foldIndexed(0L) { ind, acc, bet -> acc + (ind + 1) * bet.bid }
     println("Total winnings in Camel Cards (Joker): $totalJokerWinnings")
 }
 
@@ -98,7 +95,7 @@ data class JokerBet(val hand: String, val bid: Int) : Comparable<JokerBet> {
         }
         for (i in 0 until 5) {
             if (hand[i] != other.hand[i]) {
-                return jokerStrength(hand[i]) - strength(other.hand[i])
+                return jokerStrength(hand[i]) - jokerStrength(other.hand[i])
             }
         }
         return 0
@@ -120,10 +117,10 @@ data class JokerBet(val hand: String, val bid: Int) : Comparable<JokerBet> {
             val jokers = cardsToAmounts.getOrDefault(JOKER, 0).toInt()
             val mostNonJokers = cardsToAmounts.filter { it.key != JOKER }.maxByOrNull { it.value }
 
-            val adjustedCardsToAmounts = if (mostNonJokers == null) {
-                mapOf(JOKER to 5)
-            } else {
-                mutableMapOf<Char, Int>().apply {
+            val adjustedCardsToAmounts = when {
+                jokers == 0 -> cardsToAmounts.mapValues { it.value.toInt() }
+                mostNonJokers == null -> mapOf(JOKER to 5)
+                else -> mutableMapOf<Char, Int>().apply {
                     for ((key, value) in cardsToAmounts) {
                         if (key == JOKER) {
                             continue
@@ -150,8 +147,8 @@ data class JokerBet(val hand: String, val bid: Int) : Comparable<JokerBet> {
     }
 }
 
-enum class HandType(val value: Int) {
-    HIGH_CARD(1), PAIR(2), TWO_PAIRS(3), TRIPLE(4), FULL_HOUSE(5), FOUR(6), FIVE(7)
+enum class HandType {
+    HIGH_CARD, PAIR, TWO_PAIRS, TRIPLE, FULL_HOUSE, FOUR, FIVE
 }
 
 fun strength(card: Char): Int {
