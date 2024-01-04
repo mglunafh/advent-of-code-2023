@@ -10,7 +10,7 @@ fun main() {
     val scratchCards = lines.map(::parseCard)
 
     val sumOfScratchCardPoints = scratchCards.sumOf { it.netWorthFunc }
-    println(sumOfScratchCardPoints)
+    println("Sum of points from scratch cards: $sumOfScratchCardPoints")
 
     var amountOfCards = 0
     val additionalCopies = mutableMapOf<Int, Int>()
@@ -24,7 +24,7 @@ fun main() {
         amountOfCards += amountToAdd
     }
     println(additionalCopies)
-    println(amountOfCards)
+    println("Amount of scratch cards: $amountOfCards")
 }
 
 fun parseCard(line: String): ScratchCard {
