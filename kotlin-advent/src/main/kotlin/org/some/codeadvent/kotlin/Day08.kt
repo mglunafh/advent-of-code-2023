@@ -1,16 +1,22 @@
 package org.some.codeadvent.kotlin
 
-import java.nio.file.Files
-import java.nio.file.Path
+object Day08 : Challenge {
+    override val day = 8
 
-fun main() {
-    val filename = Path.of("data/day08-input.txt")
-    val lines = Files.lines(filename).toList()
+    private val network: DesertNetwork
 
-    val network = DesertNetwork(lines)
+    init {
+        val lines = loadResourceLines("data/day08-input.txt", "Could not load desert network")
+        network = DesertNetwork(lines)
 
-    println("Steps: ${network.followPath()}")
-    println("Ghost steps: ${network.followGhostPath()}")
+    }
+    override fun runSimple() {
+        println("Steps: ${network.followPath()}")
+    }
+
+    override fun runHard() {
+        println("Ghost steps: ${network.followGhostPath()}")
+    }
 }
 
 class DesertNetwork(lines: List<String>) {
@@ -103,7 +109,7 @@ class DesertNetwork(lines: List<String>) {
         }
 
         val commonFactor = commonFactors.fold(1L) { acc, l -> acc * l }
-        return reducedNumbers.fold(commonFactor) {acc, l -> acc * l}
+        return reducedNumbers.fold(commonFactor) { acc, l -> acc * l }
     }
 
     private fun isPrime(n: Int): Boolean {

@@ -1,7 +1,5 @@
 package org.some.codeadvent.kotlin
 
-import java.io.InputStreamReader
-
 object Day02 : Challenge {
     override val day = 2
 
@@ -9,13 +7,8 @@ object Day02 : Challenge {
 
     data class Handful(val red: Int = 0, val green: Int = 0, val blue: Int = 0)
 
-    private val lines: List<String>
-    private val gameRecords: List<GameRecord>
-
-    init {
-        lines = loadResourceLines("data/day02-input.txt", "file with the 'Cube Conundrum' could not be loaded")
-        gameRecords = lines.map { parseGameRecordSplit(it) }
-    }
+    private val lines = loadResourceLines("data/day02-input.txt", "file with the 'Cube Conundrum' could not be loaded")
+    private val gameRecords = lines.map { parseGameRecordSplit(it) }
 
     override fun runSimple() {
         val sumOfValidGameIds = gameRecords

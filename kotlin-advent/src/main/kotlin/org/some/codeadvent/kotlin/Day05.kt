@@ -1,60 +1,65 @@
 package org.some.codeadvent.kotlin
 
-import java.nio.file.Files
-import java.nio.file.Path
+object Day05 : Challenge {
 
-fun main() {
-    val filename = Path.of("data/day05-input.txt")
-    val almanacString = Files.readString(filename, Charsets.UTF_8)
+    override val day = 5
 
-    val mappingsString = almanacString.split("\n\n")
+    private val almanacString = loadResourceAsString("data/day05-input.txt", "Could not load almanac")
+    private val mappingsString = almanacString.split("\n\n")
+    private val listOfMappings = mappingsString.drop(1).map(::parseMapping)
+    private val seeds: List<Long>
 
-    val initialCondition = mappingsString[0]
-    val seeds = initialCondition.substringAfter(" ").split(" ").map { it.toLong() }
-    println(seeds)
-
-    val listOfMappings = mappingsString.drop(1).map(::parseMapping)
-    val lowestLocation = listOfMappings
-        .fold(seeds) { acc, agriMap -> acc.map(agriMap::map) }
-        .min()
-    println(lowestLocation)
-
-    val seedRanges = seeds
-        .zipWithNext()
-        .filterIndexed { ind, _ -> ind % 2 == 0}
-        .map { Range(it.first, it.second) }
-    println(seedRanges)
-    val locationRanges = listOfMappings
-        .fold(seedRanges) {acc, agriMap -> acc.flatMap(agriMap::mapRange) }
-
-    println(locationRanges.minBy { it.start })
-}
-
-fun parseMapping(mapString: String): AgriMap {
-    val lines = mapString.split("\n")
-    val header = lines[0].substringBefore(" ").split("-to-")
-    val from = Entity.valueOf(header[0].uppercase())
-    val to = Entity.valueOf(header[1].uppercase())
-
-    val result = lines.drop(1)
-        .map { it.split(" ") }
-        .map { mapping(it) }
-        .sortedBy { it.sourceStart }
-
-    return AgriMap(from, to, result)
-}
-
-fun mapping(record: List<String>): Mapping {
-    if (record.size < 3) {
-        throw IllegalArgumentException("Record $record contains less than 3 numbers")
+    init {
+        val initialCondition = mappingsString[0]
+        seeds = initialCondition.substringAfter(" ").split(" ").map { it.toLong() }
     }
-    val destStart = record[0].toLongOrNull()
-    val sourceStart = record[1].toLongOrNull()
-    val range = record[2].toLongOrNull()
-    if (destStart == null || sourceStart == null || range == null) {
-        throw IllegalArgumentException("Could not parse number from ${record[0]}, ${record[1]}, or ${record[2]}")
+
+    override fun runSimple() {
+        val lowestLocation = listOfMappings
+            .fold(seeds) { acc, agriMap -> acc.map(agriMap::map) }
+            .min()
+        println("Lowest location to start seeding: $lowestLocation")
     }
-    return Mapping(destStart, sourceStart, range)
+
+    override fun runHard() {
+        val seedRanges = seeds
+            .zipWithNext()
+            .filterIndexed { ind, _ -> ind % 2 == 0}
+            .map { Range(it.first, it.second) }
+        println(seedRanges)
+        val locationRanges = listOfMappings
+            .fold(seedRanges) {acc, agriMap -> acc.flatMap(agriMap::mapRange) }
+
+        println("Lowest location to sart: ${locationRanges.minBy { it.start }}")
+    }
+
+    private fun parseMapping(mapString: String): AgriMap {
+        val lines = mapString.split("\n")
+        val header = lines[0].substringBefore(" ").split("-to-")
+        val from = Entity.valueOf(header[0].uppercase())
+        val to = Entity.valueOf(header[1].uppercase())
+
+        val result = lines.drop(1)
+            .map { it.split(" ") }
+            .map { mapping(it) }
+            .sortedBy { it.sourceStart }
+
+        return AgriMap(from, to, result)
+    }
+
+    private fun mapping(record: List<String>): Mapping {
+        if (record.size < 3) {
+            throw IllegalArgumentException("Record $record contains less than 3 numbers")
+        }
+        val destStart = record[0].toLongOrNull()
+        val sourceStart = record[1].toLongOrNull()
+        val range = record[2].toLongOrNull()
+        if (destStart == null || sourceStart == null || range == null) {
+            throw IllegalArgumentException("Could not parse number from ${record[0]}, ${record[1]}, or ${record[2]}")
+        }
+        return Mapping(destStart, sourceStart, range)
+    }
+
 }
 
 data class AgriMap(val from: Entity, val to: Entity, private val primaryMappings: List<Mapping>) {
@@ -70,7 +75,6 @@ data class AgriMap(val from: Entity, val to: Entity, private val primaryMappings
                 val start = left.sourceStart + left.range
                 val range = right.sourceStart - start
                 val newMapping = Mapping(start, start, range)
-                println("$from: Added new $newMapping")
                 result.add(newMapping)
             }
             result.add(right)

@@ -1,27 +1,30 @@
 package org.some.codeadvent.kotlin
 
-import java.nio.file.Files
-import java.nio.file.Path
+object Day07 : Challenge {
+    override val day = 7
 
-fun main() {
-    val filename = Path.of("data/day07-input.txt")
-    val lines = Files.lines(filename).toList()
+    private val lines = loadResourceLines("data/day07-input.txt", "Could not load the data for Camel Cards.")
 
-    val draws = lines
-        .map { it.split(" ") }
-        .map { Bet(it[0], it[1].toInt()) }
+    override fun runSimple() {
+        val draws = lines
+            .map { it.split(" ") }
+            .map { Bet(it[0], it[1].toInt()) }
 
-    val totalWinnings = draws.sorted()
-        .foldIndexed(0L) { ind, acc, bet -> acc + (ind + 1) * bet.bid }
-    println("Total winnings in Camel Cards: $totalWinnings")
+        val totalWinnings = draws.sorted()
+            .foldIndexed(0L) { ind, acc, bet -> acc + (ind + 1) * bet.bid }
+        println("Total winnings in Camel Cards: $totalWinnings")
+    }
 
-    val jokerDraws = lines
-        .map { it.split(" ") }
-        .map { JokerBet(it[0], it[1].toInt()) }
+    override fun runHard() {
+        val jokerDraws = lines
+            .map { it.split(" ") }
+            .map { JokerBet(it[0], it[1].toInt()) }
 
-    val totalJokerWinnings = jokerDraws.sorted()
-        .foldIndexed(0L) { ind, acc, bet -> acc + (ind + 1) * bet.bid }
-    println("Total winnings in Camel Cards (Joker): $totalJokerWinnings")
+        val totalJokerWinnings = jokerDraws.sorted()
+            .foldIndexed(0L) { ind, acc, bet -> acc + (ind + 1) * bet.bid }
+        println("Total winnings in Camel Cards (Joker): $totalJokerWinnings")
+
+    }
 }
 
 data class Bet(val hand: String, val bid: Int) : Comparable<Bet> {

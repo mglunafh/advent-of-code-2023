@@ -1,7 +1,5 @@
 package org.some.codeadvent.kotlin
 
-import java.io.InputStreamReader
-
 object Day01: Challenge {
     override val day = 1
 
